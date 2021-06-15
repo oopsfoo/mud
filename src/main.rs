@@ -93,14 +93,14 @@ struct NFEventHandler {
     tcp_connect_request: extern fn(id: c_longlong, conn_info: TcpConnInfo),
     tcp_connected: extern fn(id: c_longlong, conn_info: TcpConnInfo),
     tcp_closed: extern fn(id: c_longlong, conn_info: TcpConnInfo),
-    tcp_receive: extern fn(id: c_longlong, buf: *const c_char, len: c_int),
-    tcp_send: extern fn(id: c_longlong, buf: *const c_char, len: c_int),
+    tcp_receive: unsafe extern fn(id: ENDPOINT_ID, buf: *const c_char, len: c_int),
+    tcp_send: unsafe extern fn(id: ENDPOINT_ID, buf: *const c_char, len: c_int),
     tcp_can_receive: extern fn(id: c_longlong),
     tcp_can_send: extern fn(id: c_longlong),
     udp_created: unsafe extern fn(id: c_longlong, conn_info: *const NFUdpConnInfo),
     udp_connect_request: extern fn(id: c_longlong, conn_info: NFUdpConnInfo),
     udp_closed: extern fn(id: c_longlong, conn_info: NFUdpConnInfo),
-    udp_receive: unsafe extern fn(id: c_longlong, remote: *const c_char, buf: *const c_char, len: c_int, options: NFUdpOptions),
+    udp_receive: unsafe extern fn(id: ENDPOINT_ID, remote: *const u_char, buf: *const c_char, len: c_int, options: &NFUdpOptions),
     udp_send: unsafe extern fn(id: ENDPOINT_ID, remote: *const u_char, buf: *const c_char, len: c_int, options: &NFUdpOptions),
     udp_can_receive: extern fn(id: c_longlong),
     udp_can_send: extern fn(id: c_longlong),
@@ -112,6 +112,10 @@ extern "C" {
     fn nf_free();
     fn nf_adjustProcessPriviledges();
     fn nf_addRule(rule: *const NFRule, to_head: c_int) -> NFStatus;
+    fn nf_tcpPostSend(id: ENDPOINT_ID, buf: *const c_char, len: c_int);
+    fn nf_tcpPostReceive(id: ENDPOINT_ID, buf: *const c_char, len: c_int);
+    fn nf_udpPostSend(id: ENDPOINT_ID, remoteAddress: *const u_char, buf: *const c_char, len: c_int, options: &NFUdpOptions);
+    fn nf_udpPostReceive(id: ENDPOINT_ID, remoteAddress: *const u_char, buf: *const c_char, len: c_int, options: &NFUdpOptions);
 }
 
 extern fn nf_thread_start() {
@@ -134,12 +138,14 @@ extern fn nf_tcp_closed(id: c_longlong, conn_info: TcpConnInfo) {
     println!("tcp->Closed();");
 }
 
-extern fn nf_tcp_receive(id: c_longlong, buf: *const c_char, len: c_int) {
+unsafe extern fn nf_tcp_receive(id: ENDPOINT_ID, buf: *const c_char, len: c_int) {
     println!("tcp->receive();");
+    nf_tcpPostReceive(id, buf, len);
 }
 
-extern fn nf_tcp_send(id: c_longlong, buf: *const c_char, len: c_int) {
+unsafe extern fn nf_tcp_send(id: ENDPOINT_ID, buf: *const c_char, len: c_int) {
     println!("tcp->send();");
+    nf_tcpPostSend(id, buf, len);
 }
 
 extern fn nf_tcp_can_receive(id: c_longlong) {
@@ -179,12 +185,14 @@ extern fn nf_udp_closed(id: c_longlong, conn_info: NFUdpConnInfo) {
     println!("udp->close();");
 }
 
-unsafe extern fn nf_udp_receive(id: c_longlong, remote: *const c_char, buf: *const c_char, len: c_int, options: NFUdpOptions) {
+unsafe extern fn nf_udp_receive(id:ENDPOINT_ID, remoteAddress: *const u_char, buf: *const c_char, len: c_int, options: &NFUdpOptions) {
     println!("udp->receive();");
+    nf_udpPostReceive(id, remoteAddress, buf, len, options);
 }
 
 unsafe extern fn nf_udp_send(id: ENDPOINT_ID, remoteAddress: *const u_char, buf: *const c_char, len: c_int, options: &NFUdpOptions) {
     println!("udp->send: id={}", id);
+    nf_udpPostSend(id, remoteAddress, buf, len, options);
 }
 
 extern fn nf_udp_can_receive(id: c_longlong) {
