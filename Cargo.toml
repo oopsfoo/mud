@@ -9,6 +9,6 @@ rustc-link-search = ["./external/NetFilter_SDK/x64_capi/"]
 rustc-link-lib = ["nfapi"]
 
 [build-dependencies]
-bindgen = "0.53.1"
 
 [dependencies]
+winapi = { version = "0.3", features = ["winsock2","ws2def","ws2ipdef"]}
