@@ -11,4 +11,6 @@ rustc-link-lib = ["nfapi"]
 [build-dependencies]
 
 [dependencies]
+log = { version = "0.4", features = ["std", "serde"] }
+simplelog = { version = "0.10.0"}
 winapi = { version = "0.3", features = ["winsock2","ws2def","ws2ipdef"]}
