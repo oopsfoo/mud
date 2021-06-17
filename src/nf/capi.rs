@@ -1,14 +1,23 @@
 use crate::nf::def::*;
-use std::os::raw::*;
+use winapi::shared::ws2def::SOCKADDR;
 
 #[link(name = "nfapi")]
 extern "C" {
-    pub fn nf_init(driver: *const c_char, handler: &NFEventHandler) -> NFStatus;
+    // nf driver
+    pub fn nf_init(driver: *const u8, handler: &NFEventHandler) -> NFStatus;
     pub fn nf_free();
     pub fn nf_adjustProcessPriviledges();
-    pub fn nf_addRule(rule: *const NFRule, to_head: c_int) -> NFStatus;
-    pub fn nf_tcpPostSend(id: EndpointId, buf: *const c_char, len: c_int);
-    pub fn nf_tcpPostReceive(id: EndpointId, buf: *const c_char, len: c_int);
-    pub fn nf_udpPostSend(id: EndpointId, remote_address: *const c_uchar, buf: *const c_char, len: c_int, options: &NFUdpOptions);
-    pub fn nf_udpPostReceive(id: EndpointId, remote_address: *const c_uchar, buf: *const c_char, len: c_int, options: &NFUdpOptions);
+
+    // rule
+    pub fn nf_addRule(rule: *const NFRule, to_head: i32) -> NFStatus;
+
+    // nf network
+    pub fn nf_tcpPostSend(id: u64, buf: *const u8, len: i32);
+    pub fn nf_tcpPostReceive(id: u64, buf: *const u8, len: i32);
+    pub fn nf_udpPostSend(id: u64, remote_address: *const SOCKADDR, buf: *const u8, len: i32, options: &NFUdpOptions);
+    pub fn nf_udpPostReceive(id: u64, remote_address: *const SOCKADDR, buf: *const u8, len: i32, options: &NFUdpOptions);
+
+    // nf helper
+    // BOOL nf_getProcessNameFromKernel(DWORD process_id, wchar_t * buf, DWORD len)
+    pub fn nf_getProcessNameFromKernel(process_id: u32, buf: *mut u16, len: u32) -> i32;
 }

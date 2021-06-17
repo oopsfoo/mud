@@ -17,13 +17,13 @@ use simplelog::*;
 fn main() {
     CombinedLogger::init(
         vec![
-            TermLogger::new(LevelFilter::Debug, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
+            TermLogger::new(LevelFilter::Trace, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
             // WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_binary.log").unwrap()),
         ]
     ).unwrap();
     unsafe {
         let nf_driver_name = CString::new(b"netfilter2" as &[u8]).unwrap();
-        let nf_driver_name_ptr: *const c_char = nf_driver_name.as_ptr();
+        let nf_driver_name_ptr: *const u8 = nf_driver_name.as_ptr() as *const u8;
         let nf_handler = NFEventHandler {
             thread_start: nf_thread_start,
             thread_end: nf_thread_end,

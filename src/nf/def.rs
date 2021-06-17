@@ -1,6 +1,4 @@
-use std::os::raw::*;
-
-pub type EndpointId = winapi::um::winsock2::u_int64;
+use winapi::shared::ws2def::SOCKADDR;
 
 pub const NF_MAX_ADDRESS_LENGTH: usize = 28;
 pub const NF_MAX_IP_ADDRESS_LENGTH: usize = 16;
@@ -33,59 +31,59 @@ pub enum NFFilteringFlag {
 
 #[repr(packed)]
 pub struct NFTcpConnInfo {
-    pub filtering_flag: c_ulong,
-    pub process_id: c_ulong,
-    pub direction: c_uchar,
-    pub ip_family: c_ushort,
-    pub local_address: [c_uchar; NF_MAX_ADDRESS_LENGTH],
-    pub remote_address: [c_uchar; NF_MAX_ADDRESS_LENGTH],
+    pub filtering_flag: u32,
+    pub process_id: u32,
+    pub direction: u8,
+    pub ip_family: u16,
+    pub local_address: [u8; NF_MAX_ADDRESS_LENGTH],
+    pub remote_address: [u8; NF_MAX_ADDRESS_LENGTH],
 }
 
 #[repr(packed)]
 pub struct NFUdpConnInfo {
-    pub process_id: c_ulong,
-    pub ip_family: c_ushort,
-    pub local_address: [c_uchar; NF_MAX_ADDRESS_LENGTH],
+    pub process_id: u32,
+    pub ip_family: u16,
+    pub local_address: [u8; NF_MAX_ADDRESS_LENGTH],
 }
 
 #[repr(C)]
 pub struct NFUdpOptions {
-    pub flags: c_ulong,
-    pub options_length: c_long,
-    pub options: *const c_uchar,
+    pub flags: u32,
+    pub options_length: u32,
+    pub options: *const u8,
 }
 
 #[repr(packed)]
 pub struct NFRule {
-    pub protocol: c_int,
-    pub process_id: c_ulong,
-    pub direction: c_uchar,
-    pub local_port: c_ushort,
-    pub remote_port: c_ushort,
-    pub ip_family: c_ushort,
-    pub local_ip_address: [c_uchar; NF_MAX_IP_ADDRESS_LENGTH],
-    pub local_ip_address_mask: [c_uchar; NF_MAX_IP_ADDRESS_LENGTH],
-    pub remote_ip_address: [c_uchar; NF_MAX_IP_ADDRESS_LENGTH],
-    pub remote_ip_address_mask: [c_uchar; NF_MAX_IP_ADDRESS_LENGTH],
-    pub filtering_flag: c_ulong,
+    pub protocol: i32,
+    pub process_id: u32,
+    pub direction: u8,
+    pub local_port: u16,
+    pub remote_port: u16,
+    pub ip_family: u16,
+    pub local_ip_address: [u8; NF_MAX_IP_ADDRESS_LENGTH],
+    pub local_ip_address_mask: [u8; NF_MAX_IP_ADDRESS_LENGTH],
+    pub remote_ip_address: [u8; NF_MAX_IP_ADDRESS_LENGTH],
+    pub remote_ip_address_mask: [u8; NF_MAX_IP_ADDRESS_LENGTH],
+    pub filtering_flag: u32,
 }
 
 #[repr(C)]
 pub struct NFEventHandler {
     pub thread_start: extern fn(),
     pub thread_end: extern fn(),
-    pub tcp_connect_request: extern fn(id: c_longlong, conn_info: NFTcpConnInfo),
-    pub tcp_connected: extern fn(id: c_longlong, conn_info: NFTcpConnInfo),
-    pub tcp_closed: extern fn(id: c_longlong, conn_info: NFTcpConnInfo),
-    pub tcp_receive: unsafe extern fn(id: EndpointId, buf: *const c_char, len: c_int),
-    pub tcp_send: unsafe extern fn(id: EndpointId, buf: *const c_char, len: c_int),
-    pub tcp_can_receive: extern fn(id: c_longlong),
-    pub tcp_can_send: extern fn(id: c_longlong),
-    pub udp_created: unsafe extern fn(id: c_longlong, conn_info: *const NFUdpConnInfo),
-    pub udp_connect_request: extern fn(id: c_longlong, conn_info: NFUdpConnInfo),
-    pub udp_closed: extern fn(id: c_longlong, conn_info: NFUdpConnInfo),
-    pub udp_receive: unsafe extern fn(id: EndpointId, remote: *const c_uchar, buf: *const c_char, len: c_int, options: &NFUdpOptions),
-    pub udp_send: unsafe extern fn(id: EndpointId, remote: *const c_uchar, buf: *const c_char, len: c_int, options: &NFUdpOptions),
-    pub udp_can_receive: extern fn(id: c_longlong),
-    pub udp_can_send: extern fn(id: c_longlong),
+    pub tcp_connect_request: unsafe extern fn(id: u64, conn_info: &NFTcpConnInfo),
+    pub tcp_connected: extern fn(id: u64, conn_info: &NFTcpConnInfo),
+    pub tcp_closed: extern fn(id: u64, conn_info: &NFTcpConnInfo),
+    pub tcp_receive: unsafe extern fn(id: u64, buf: *const u8, len: i32),
+    pub tcp_send: unsafe extern fn(id: u64, buf: *const u8, len: i32),
+    pub tcp_can_receive: extern fn(id: u64),
+    pub tcp_can_send: extern fn(id: u64),
+    pub udp_created: unsafe extern fn(id: u64, conn_info: &NFUdpConnInfo),
+    pub udp_connect_request: unsafe extern fn(id: u64, conn_info: &NFUdpConnInfo),
+    pub udp_closed: unsafe extern fn(id: u64, conn_info: &NFUdpConnInfo),
+    pub udp_receive: unsafe extern fn(id: u64, remote: *const SOCKADDR, buf: *const u8, len: i32, options: &NFUdpOptions),
+    pub udp_send: unsafe extern fn(id: u64, remote: *const SOCKADDR, buf: *const u8, len: i32, options: &NFUdpOptions),
+    pub udp_can_receive: extern fn(id: u64),
+    pub udp_can_send: extern fn(id: u64),
 }
