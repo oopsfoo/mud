@@ -2,6 +2,7 @@ use crate::nf::def::*;
 use winapi::shared::ws2def::SOCKADDR;
 
 #[link(name = "nfapi")]
+#[allow(improper_ctypes)]
 extern "C" {
     // nf driver
     pub fn nf_init(driver: *const u8, handler: &NFEventHandler) -> NFStatus;
@@ -9,7 +10,7 @@ extern "C" {
     pub fn nf_adjustProcessPriviledges();
 
     // rule
-    pub fn nf_addRule(rule: *const NFRule, to_head: i32) -> NFStatus;
+    pub fn nf_addRule(rule: &NFRule, to_head: i32) -> NFStatus;
 
     // nf network
     pub fn nf_tcpPostSend(id: u64, buf: *const u8, len: i32);
