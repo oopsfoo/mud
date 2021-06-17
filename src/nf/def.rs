@@ -14,7 +14,7 @@ pub enum NFStatus {
     NfStatusRebootRequired = -5,
 }
 
-#[repr(C)]
+#[repr(u32)]
 pub enum NFFilteringFlag {
     NfAllow = 0,
     NfFilter = 2,
@@ -27,6 +27,10 @@ pub enum NFFilteringFlag {
     NfReadonly = 256,
     NfControlFlow = 512,
     NfRedirect = 1024,
+}
+
+impl Default for NFFilteringFlag {
+    fn default() -> Self { NFFilteringFlag::NfAllow }
 }
 
 #[repr(packed)]
@@ -54,6 +58,7 @@ pub struct NFUdpOptions {
 }
 
 #[repr(packed)]
+#[derive(Default)]
 pub struct NFRule {
     pub protocol: i32,
     pub process_id: u32,
@@ -65,7 +70,7 @@ pub struct NFRule {
     pub local_ip_address_mask: [u8; NF_MAX_IP_ADDRESS_LENGTH],
     pub remote_ip_address: [u8; NF_MAX_IP_ADDRESS_LENGTH],
     pub remote_ip_address_mask: [u8; NF_MAX_IP_ADDRESS_LENGTH],
-    pub filtering_flag: u32,
+    pub filtering_flag: NFFilteringFlag,
 }
 
 #[repr(C)]

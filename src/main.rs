@@ -42,19 +42,8 @@ fn main() {
             udp_can_receive: nf_udp_can_receive,
             udp_can_send: nf_udp_can_send,
         };
-        let nf_rule = NFRule {
-            protocol: 0 as c_int,
-            process_id: 0 as c_ulong,
-            direction: 0 as c_uchar,
-            local_port: 0 as c_ushort,
-            remote_port: 0 as c_ushort,
-            ip_family: 0 as c_ushort,
-            local_ip_address: [c_uchar::from(0); NF_MAX_IP_ADDRESS_LENGTH],
-            local_ip_address_mask: [c_uchar::from(0); NF_MAX_IP_ADDRESS_LENGTH],
-            remote_ip_address: [c_uchar::from(0); NF_MAX_IP_ADDRESS_LENGTH],
-            remote_ip_address_mask: [c_uchar::from(0); NF_MAX_IP_ADDRESS_LENGTH],
-            filtering_flag: NFFilteringFlag::NfFilter as c_ulong,
-        };
+        let mut nf_rule:NFRule = Default::default();
+        nf_rule.filtering_flag = NFFilteringFlag::NfFilter;
         nf_adjustProcessPriviledges();
         // let init_status =
         let init_status = nf_init(nf_driver_name_ptr, &nf_handler);
