@@ -19,13 +19,13 @@ fn main() {
         ]
     ).unwrap();
     unsafe {
-        let nf_driver_name = CString::new(b"netfilter2" as &[u8]).unwrap();
-        let nf_driver_name_ptr: *const u8 = nf_driver_name.as_ptr() as *const u8;
+        let nf_driver_name = CString::new(b"netfilter2" as &[u8]).unwrap(); //TODO need better way for string -> &u8
         let nf_handler = Default::default();
         let mut nf_rule:NFRule = Default::default();
         nf_rule.filtering_flag = NFFilteringFlag::NfFilter;
+
         nf_adjustProcessPriviledges();
-        let init_status = nf_init(nf_driver_name_ptr, &nf_handler);
+        let init_status = nf_init(&nf_driver_name.to_bytes()[0], &nf_handler);
         match init_status {
             NFStatus::NfStatusSuccess => {
                 info!("nf driver inited success! starting add rule.");
