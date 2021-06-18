@@ -75,12 +75,13 @@ pub unsafe extern fn nf_udp_closed(_id: u64, conn_info: &NFUdpConnInfo) {
 }
 
 pub unsafe extern fn nf_udp_receive(id: u64, remote_address: &NFSockAddr, buf: &u8, len: i32, options: &NFUdpOptions) {
-    // println!("udp->receive();");
+    trace!("udp->receive() [{}: packet from: {}, size: {}]", id, nf_socket_address(remote_address).unwrap(), len);
     nf_udpPostReceive(id, remote_address, buf, len, options);
+
 }
 
 pub unsafe extern fn nf_udp_send(id: u64, remote_address: &NFSockAddr, buf: &u8, len: i32, options: &NFUdpOptions) {
-    // println!("udp->send: id={}", id);
+    trace!("udp->send() [{}: packet to: {}, size: {}]", id, nf_socket_address(remote_address).unwrap(), len);
     nf_udpPostSend(id, remote_address, buf, len, options);
 }
 

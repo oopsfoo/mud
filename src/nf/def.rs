@@ -74,8 +74,8 @@ impl Default for NFDirection {
 
 #[repr(packed)]
 pub struct NFSockAddr {
-    sa_family: NFIpFamily,
-    sa_data: [u8; 14],
+    pub sa_family: NFIpFamily,
+    pub sa_data: [u8; 14],
 }
 
 #[repr(packed)]
