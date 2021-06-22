@@ -1,8 +1,11 @@
 mod nf;
+mod net;
 
 use crate::nf::def::*;
 use crate::nf::capi::*;
 use crate::nf::util::*;
+
+use crate::net::ss;
 
 use std::io::stdin;
 use std::ffi::CString;
@@ -12,8 +15,10 @@ extern crate log;
 extern crate simplelog;
 
 use simplelog::*;
-use std::net::UdpSocket;
+use std::net::{UdpSocket, SocketAddr};
 use std::ptr::slice_from_raw_parts;
+use std::error::Error;
+use tokio::runtime::Builder;
 
 fn main() {
     CombinedLogger::init(
@@ -55,7 +60,6 @@ fn main() {
         println!("You guessed: {}", guess);
         nf_free()
     };
-    println!("Hello, world!");
 }
 
 
@@ -88,4 +92,16 @@ unsafe extern fn my_real_udp_send(id: u64, remote_address: &NFSockAddr, buf: &u8
     let (ret_len, _) = socket.recv_from(&mut buff).unwrap();
     info!("my_conn_r() [ret_len: {}]", ret_len);
     nf_udpPostReceive(id, remote_address, &buff[0], ret_len as i32, options);
+
+    info!("send to ss");
+    // USE ss udp
+    let dst = nf_socket_address(remote_address).unwrap();
+
+    let mut builder = Builder::new_current_thread();
+
+    let runtime = builder.enable_all().build().expect("create tokio Runtime");
+
+    runtime.block_on(
+        ss::udp::send(SocketAddr::V4(dst).clone(), data.as_ref().unwrap())
+    );
 }
